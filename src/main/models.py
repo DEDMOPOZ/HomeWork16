@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.utils.timezone import now
 
@@ -9,35 +11,47 @@ class Author(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def cache_key(cls):
+        dt = datetime.today().strftime('%Y_%m_%d')
+        key = f'authors_{dt}'
+        return key
+
 
 class Subscriber(models.Model):
     class Meta:
-        unique_together = ["email_to", "author_id"]
+        unique_together = ['email_to', 'author_id']
     email_to = models.EmailField("Subscriber's Email", max_length=100)
-    author_id = models.ForeignKey("Author", on_delete=models.CASCADE)
+    author_id = models.ForeignKey('Author', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.email_to
 
 
 class Post(models.Model):
-    title = models.CharField("Title", max_length=100)
-    description = models.CharField("Description", max_length=100)
-    content = models.TextField("Text")
+    title = models.CharField('Title', max_length=100)
+    description = models.CharField('Description', max_length=100)
+    content = models.TextField('Text')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(default=now)
 
     def __str__(self):
         return self.title
 
+    @classmethod
+    def cache_key(cls):
+        dt = datetime.today().strftime('%Y_%m_%d')
+        key = f'posts_{dt}'
+        return key
+
 
 class Comments(models.Model):
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
-    comment = models.TextField("Comment")
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
+    comment = models.TextField('Comment')
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ("created",)
+        ordering = ('created',)
 
     def __str__(self):
         return self.post
@@ -45,9 +59,9 @@ class Comments(models.Model):
 
 class Logger(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    time_execution = models.FloatField("time_exec")
-    path = models.CharField("path", max_length=100)
-    utm = models.CharField("utm", max_length=100)
+    time_execution = models.FloatField('time_exec')
+    path = models.CharField('path', max_length=100)
+    utm = models.CharField('utm', max_length=100)
     ip = models.GenericIPAddressField()
 
     def __str__(self):
@@ -55,19 +69,25 @@ class Logger(models.Model):
 
 
 class Book(models.Model):
-    title = models.CharField("Book title", max_length=250)
-    author = models.ForeignKey("Author", on_delete=models.CASCADE, related_name="books")
-    category = models.ForeignKey("Category", on_delete=models.CASCADE, related_name="books")
+    title = models.CharField('Book title', max_length=250)
+    author = models.ForeignKey('Author', on_delete=models.CASCADE, related_name='books')
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='books')
 
     def __str__(self):
         return self.title
 
 
 class Category(models.Model):
-    title = models.CharField("Category", max_length=250)
+    title = models.CharField('Category', max_length=250)
 
     def __str__(self):
         return self.title
+
+    @classmethod
+    def cache_key(cls):
+        dt = datetime.today().strftime('%Y_%m_%d')
+        key = f'categories_{dt}'
+        return key
 
 
 class ContactUs(models.Model):
